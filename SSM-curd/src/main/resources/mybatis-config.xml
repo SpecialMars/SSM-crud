@@ -9,26 +9,5 @@
         <!--设置mybatis输出日志-->
         <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
-
-    <!--环境配置： 数据库的连接信息-->
-    <environments default="mydev">
-        <environment id="mydev">
-            <transactionManager type="JDBC"/>
-            <dataSource type="POOLED">
-                <!--数据库的驱动类名-->
-                <property name="driver" value="com.mysql.jdbc.Driver"/>
-                <!--连接数据库的url字符串-->
-                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
-                <!--访问数据库的用户名-->
-                <property name="username" value="root"/>
-                <!--密码-->
-                <property name="password" value="123"/>
-            </dataSource>
-        </environment>
-    </environments>
     <!-- sql mapper(sql映射文件)的位置-->
-    <mappers>
-
-        <mapper resource=""/>
-    </mappers>
 </configuration>
