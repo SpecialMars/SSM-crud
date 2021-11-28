@@ -43,11 +43,16 @@ public class MVCTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
+    /**
+     * 测试分页查询所有用户数据是否成功
+     *
+     * @throws Exception
+     */
     @Test
     public void testPage() throws Exception {
         // 模拟请求拿到返回值
         MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.get("/emps").param("pn", "1")).andReturn();
+                MockMvcRequestBuilders.get("/emps").param("pn", "5")).andReturn();
 
         // 请求成功以后，请求域中会有pageInfo，我们可以取出pageInfo进行验证
         MockHttpServletRequest request = result.getRequest();

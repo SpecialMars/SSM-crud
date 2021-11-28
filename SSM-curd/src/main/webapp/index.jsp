@@ -5,6 +5,8 @@
   Time: 11:11
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<jsp:forward page="/emps"/>
+<%--
 <html>
 <head>
    <!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8">-->
@@ -16,8 +18,7 @@
     <script src="static/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <button type="button" class="btn btn-success">（成功）Success</button>
-    <button type="button" class="btn btn-primary">（首选项）Primary</button>
 
 </body>
 </html>
+--%>
