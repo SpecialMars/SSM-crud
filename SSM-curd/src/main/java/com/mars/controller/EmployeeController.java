@@ -27,9 +27,6 @@ public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
 
-    @Autowired
-    PageHelper pageHelper;
-
     /**
      * 查询员工数据（分页查询）
      *
@@ -39,7 +36,7 @@ public class EmployeeController {
     public String getEmps(@RequestParam(value = "pn", defaultValue = "1") Integer pn, Model model) {
         // 使用分页助手插件
         // 在查询之前只需要调用，传入页码，和每页的大小（每页查询个数）
-        pageHelper.startPage(pn, 8);
+        PageHelper.startPage(pn, 8);
         // startPage后紧跟的整个查询就是分页查询
         List<Employee> employeeList = employeeService.getAll();
         // 使用PageInfo包装查询的结果，然后将PageInfo交给页面
