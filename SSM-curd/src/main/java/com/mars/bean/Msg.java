@@ -19,7 +19,7 @@ public class Msg {
     private String msg;
 
     // 用户要返回给浏览器的数据
-    private Map<String, Object> extend = new HashMap<>();
+    private Map<String, Object> extendMap = new HashMap<>();
 
     // 设置成功信息
     public static Msg success() {
@@ -38,7 +38,7 @@ public class Msg {
     }
 
     public Msg add(String key, Object value) {
-        this.getExtend().put(key, value);
+        this.getExtendMap().put(key, value);
         return this;
     }
 
@@ -58,11 +58,11 @@ public class Msg {
         this.msg = msg;
     }
 
-    public Map<String, Object> getExtend() {
-        return extend;
+    public Map<String, Object> getExtendMap() {
+        return extendMap;
     }
 
-    public void setExtend(Map<String, Object> extend) {
-        this.extend = extend;
+    public void setExtendMap(Map<String, Object> extendMap) {
+        this.extendMap = extendMap;
     }
 }

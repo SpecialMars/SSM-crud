@@ -1,17 +1,11 @@
-import com.mars.bean.Department;
-import com.mars.bean.Employee;
 import com.mars.dao.DepartmentMapper;
 import com.mars.dao.EmployeeMapper;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.UUID;
 
 /**
  * ClassName:MapperTest
@@ -58,15 +52,15 @@ public class MapperTest {
 
         // 测试3：批量在emp表中添加员工
         // 这个mapper可以执行批量操作
-        EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);
-        for (int i = 0; i < 1000; i++) {
-            String emp_name = UUID.randomUUID().toString().substring(0, 5) + i;
-            String gender = i % 2 == 0 ? "W" : "M";
-            String email = i % 3 == 0 ? emp_name + "@163.com" : emp_name + "@qq.com";
-            int did = i % 2 == 0 ? 1 : 2;
-            mapper.insertSelective(new Employee(null, emp_name, gender, email, did));
-        }
-        System.out.println("添加完成");
+//        EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);
+//        for (int i = 0; i < 1000; i++) {
+//            String emp_name = UUID.randomUUID().toString().substring(0, 5) + i;
+//            String gender = i % 2 == 0 ? "W" : "M";
+//            String email = i % 3 == 0 ? emp_name + "@163.com" : emp_name + "@qq.com";
+//            int did = i % 2 == 0 ? 1 : 2;
+//            mapper.insertSelective(new Employee(null, emp_name, gender, email, did));
+//        }
+//        System.out.println("添加完成");
 
     }
 }
