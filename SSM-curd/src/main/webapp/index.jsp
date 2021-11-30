@@ -20,6 +20,66 @@
     <script src="${APP_PATH}/static/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
 </head>
 <body>
+<!--编辑用户的模态框-->
+<div class="modal fade" id="empUpdateModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">编辑用户</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="empName_add_input" class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static" id="empName_update_static"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email_add_input" class="col-sm-2 control-label">邮箱</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="email" class="form-control" id="email_update_input"
+                                   placeholder="emial">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">性别</label>
+                        <div class="col-sm-10">
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender1_update_input" value="M" checked="checked">
+                                男
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender2_update_input" value="W"> 女
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">所在部门</label>
+                        <div class="col-sm-4">
+                            <!--提交部门id即可-->
+                            <select class="form-control" name="dId" id="dept_update_select"></select>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="emp_update_btn">修改</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <!--添加用户的模态框-->
 <div class="modal fade" id="empAddModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -28,7 +88,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+                <h4 class="modal-title">添加用户</h4>
             </div>
             <div class="modal-body">
 
@@ -84,6 +144,7 @@
         </div>
     </div>
 </div>
+
 <!--搭建显示页面-->
 <div class="container">
     <!--标题-->
@@ -129,7 +190,7 @@
 <script type="text/javascript">
 
     // 定义全局变量，用来显示总记录数
-    var pageTotals;
+    var pageTotals,currrentPage;
     // 1、页面加载完成以后，直接去发送ajax请求，要到分页数据
     $(function () {
         // 去首页
@@ -164,9 +225,10 @@
             var genderTd = $("<td></td>").append(item.gender == "M" ? "男" : "女");
             var emailTd = $("<td></td>").append(item.email);
             var deptNameTd = $("<td></td>").append(item.department.deptName);
-            var editBtn = $("<button></button>").addClass("btn btn-success")
+            var editBtn = $("<button></button>").addClass("btn btn-success edit_btn")
                 .append($("<span><span>").addClass("glyphicon glyphicon-pencil")).append("编辑");
-            var delBtn = $("<button></button>").addClass("btn btn-danger")
+            editBtn.attr("edit-id", item.empId);
+            var delBtn = $("<button></button>").addClass("btn btn-danger delete_btn")
                 .append($("<span><span>").addClass("glyphicon glyphicon-remove")).append("删除");
 
             // append方法完成后还会返回原来的元素
@@ -185,6 +247,7 @@
             + result.extendMap.pageInfo.pages + "页 共"
             + result.extendMap.pageInfo.total + "条记录");
         pageTotals = result.extendMap.pageInfo.total;
+        currrentPage = result.extendMap.pageInfo.pageNum;
     }
 
     // 构建分页条
@@ -265,7 +328,7 @@
         // 表单提交后重置表单
         reset_form("#empAddModel form");
         // 发送Ajax请求，查出部门信息，显示在下拉列表中
-        getDepts();
+        getDepts("#dept_add_select");
         // 弹出模态框
         $('#empAddModel').modal({
             backdrop: "static"
@@ -273,17 +336,16 @@
     });
 
     // 查出所有部门信息，并显示在下拉列表中
-    function getDepts() {
+    function getDepts(ele) {
+        $(ele).empty();
         $.ajax({
             url: "${APP_PATH}/depts",
             type: "GET",
             success: function (result) {
-                // {"code":100,"msg":"处理成功！","extendMap":{"depts":[{"deptId":1,"deptName":"财务部"},{"deptId":2,"deptName":"开发部"}]}}
                 $.each(result.extendMap.depts, function () {
-                    // console.log(result);
                     // this也可以代表当前对象
                     var optionEle = $("<option></option>").append(this.deptName).attr("value", this.deptId);
-                    optionEle.appendTo("#dept_add_select");
+                    optionEle.appendTo(ele);
                 });
             }
         });
@@ -397,6 +459,67 @@
         });
     });
 
+    // 不能用.click绑定因为.click绑定在js加载时绑定事件而编辑按钮是ajax请求带过来的
+    // 给编辑按钮绑定事件
+    $(document).on("click", ".edit_btn", function () {
+        // 查出员工信息，显示员工信息
+        getDepts("#dept_update_select");
+        // 查出部门信息，显示部门列表
+        getEmp($(this).attr("edit-id"));
+        // 把用户的id传递给模态框的更新按钮
+        $("#emp_update_btn").attr("edit-id", $(this).attr("edit-id"));
+        // 弹出模态框
+        $("#empUpdateModel").modal({
+            backdrop: "static"
+        });
+    });
+
+    function getEmp(id) {
+        $.ajax({
+            url: "${APP_PATH}/emp/" + id,
+            type: "GET",
+            success: function (result) {
+                var empData = result.extendMap.emp;
+                $("#empName_update_static").text(empData.empName);
+                $("#email_update_input").val(empData.email);
+                $("#empUpdateModel input[name = gender]").val([empData.gender]);
+                $("#empUpdateModel select").val([empData.dId]);
+            }
+        });
+    }
+
+    // 点击更新，更新员工数据
+    $("#emp_update_btn").click(function () {
+        // 校验邮箱信息
+        var email = $("#email_update_input").val();
+        var regEmail = /([a-z)-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if (!regEmail.test(email)) {
+            show_validate_msg("#email_update_input", "error", "邮箱格式错误");
+            return false;
+        } else {
+            show_validate_msg("#email_update_input", "success", "");
+        }
+
+        // 发送ajax请求保存用户的更新信息
+        $.ajax({
+            url: "${APP_PATH}/emp/" + $(this).attr("edit-id"),
+            // 请求类型应该为PUT，但不能直接定义为PUT
+            // 因为Tomcat看到请求为PUT时不会将请求体中的数据封装为Map
+            // SpringMVC通过调用request.getParameter()方法就获取不到值
+            // 只有POST形式的请求才封装请求体为map
+
+            // 解决方法：添加HttpPutFormContentFilter
+            type: "POST",
+            data: $("#empUpdateModel form").serialize() + "&_method=PUT",
+            success: function (result) {
+                // alert(result.msg);
+                // 关闭对话框
+                $("#empUpdateModel").modal("hide");
+                // 回到当前页
+                to_page(currrentPage);
+            }
+        });
+    });
 </script>
 </body>
 </html>

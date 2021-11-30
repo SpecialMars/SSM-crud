@@ -11,10 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -34,6 +31,33 @@ public class EmployeeController {
 
     @Autowired
     EmployeeService employeeService;
+
+    /**
+     * 更新用户信息
+     *
+     * @param employee
+     * @return
+     */
+    @RequestMapping(value = "/emp/{empId}",method = RequestMethod.PUT)
+    @ResponseBody
+    public Msg saveEmp(Employee employee){
+
+        employeeService.updateEmp(employee);
+        return Msg.success();
+    }
+
+    /**
+     * 通过id获取员工信息
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/emp/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Msg getEmp(@PathVariable("id") Integer id) {
+        Employee employee = employeeService.getEmp(id);
+        return Msg.success().add("emp", employee);
+    }
 
     /**
      * 检查用户名是否可用
@@ -71,12 +95,12 @@ public class EmployeeController {
     public Msg saveEmp(@Valid Employee employee, BindingResult result) {
         if (result.hasErrors()) {
             // 校验失败，应该返回失败，在模态框中显示校验失败的信息
-            Map<String,Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>();
             List<FieldError> errors = result.getFieldErrors();
             for (FieldError error : errors) {
-                map.put(error.getField(),error.getDefaultMessage());
+                map.put(error.getField(), error.getDefaultMessage());
             }
-            return Msg.fail().add("errorFields",map);
+            return Msg.fail().add("errorFields", map);
         } else {
             employeeService.saveEmp(employee);
             return Msg.success();

@@ -24,6 +24,7 @@ public class EmployeeService {
 
     /**
      * 查询所有用户
+     *
      * @return
      */
     public List<Employee> getAll() {
@@ -42,6 +43,7 @@ public class EmployeeService {
 
     /**
      * 检验用户是否存在
+     *
      * @param empName
      */
     public boolean checkUser(String empName) {
@@ -50,5 +52,27 @@ public class EmployeeService {
         criteria.andEmpNameEqualTo(empName);
         long l = employeeMapper.countByExample(example);
         return l == 0;
+    }
+
+    /**
+     * 通过主键获取用户对象
+     *
+     * @param id
+     * @return
+     */
+    public Employee getEmp(Integer id) {
+        Employee employee = employeeMapper.selectByPrimaryKey(id);
+        return employee;
+    }
+
+
+    /**
+     * 更新员工信息
+     *
+     * @param employee
+     */
+    public void updateEmp(Employee employee) {
+
+        employeeMapper.updateByPrimaryKeySelective(employee);
     }
 }
