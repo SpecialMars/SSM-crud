@@ -38,6 +38,7 @@
                         <div class="col-sm-10">
                             <input type="text" name="empName" class="form-control" id="empName_add_input"
                                    placeholder="empName">
+                            <span class="help-block"></span>
                         </div>
                     </div>
 
@@ -46,6 +47,7 @@
                         <div class="col-sm-10">
                             <input type="text" name="email" class="form-control" id="email_add_input"
                                    placeholder="emial">
+                            <span class="help-block"></span>
                         </div>
                     </div>
 
@@ -251,8 +253,17 @@
         navEle.appendTo("#page_nav_area");
     }
 
+    // 重置表单内容及样式
+    function reset_form(ele) {
+        $(ele)[0].reset();
+        $(ele).find("*").removeClass("has-error has-success");
+        $(ele).find(".help-block").text("");
+    }
+
     // 绑定用户添加的事件，点击新增按钮弹出模态框
     $("#emp_add_model_btn").click(function () {
+        // 表单提交后重置表单
+        reset_form("#empAddModel form");
         // 发送Ajax请求，查出部门信息，显示在下拉列表中
         getDepts();
         // 弹出模态框
@@ -281,9 +292,15 @@
     // 为添加绑定点击事件，保存员工信息
     $("#emp_save_btn").click(function () {
         // 先对要提交给服务器的数据进行校验
-        if(!validate_add_form()){
+        if (!validate_add_form()) {
             return false;
         }
+
+        //判断之前的ajax校验是否成功，如果成功，继续执行。不成功则返回
+        if ($(this).attr("ajax-va") == "error") {
+            return false;
+        }
+
         // 模态框中填写表单数据提交给服务器进行保存
         // 发送ajax请求保存员工
         // 使用序列化
@@ -293,37 +310,93 @@
             // 发送的数据就是表格序列化后的数据
             data: $("#empAddModel form").serialize(),
             success: function (result) {
-                // 完成请求后需要将模态框关闭，并到末页
-                $("#empAddModel").modal("hide");
-                // 到最后一页
-                // 发送ajax请求显示最后一页数据
-                to_page(pageTotals);
+                if (result.code == 100) {
+                    // 完成请求后需要将模态框关闭，并到末页
+                    $("#empAddModel").modal("hide");
+                    // 到最后一页
+                    // 发送ajax请求显示最后一页数据
+                    to_page(pageTotals);
+                } else {
+                    // 显示失败信息
+                    // console.log(result);
+                    // 显示姓名错误信息
+                    if (undefined != result.extendMap.errorFields.empName) {
+                        // 显示姓名的错误信息
+                        show_validate_msg("#empName_add_input", "error", result.extendMap.errorFields.empName);
+                    }
+                    if (undefined != result.extendMap.errorFields.email) {
+                        // 显示邮箱的错误信息
+                        show_validate_msg("#email_add_input", "error", result.extendMap.errorFields.email);
+
+                    }
+                }
+
             }
         });
     });
 
     // 定义校验表单数据方法
     function validate_add_form() {
-        // 1、拿到要校验的数据，使用正则表达式
-        var empName = $("#empName_add_input").val();
-        var regName = /(^[a-zA-Z0-9_-]{6,16}$)|(^{\u2E80-\u9FFF}{2,5})/;
+        // 拿到要校验的数据，使用正则表达式
 
         // 校验用户姓名
-        if(!regName.test(empName)){
-            alert("用户名格式错误");
+        var empName = $("#empName_add_input").val();
+        var regName = /(^[a-zA-Z0-9_-]{6,16}$)|(^[\u2E80-\u9FFF}]{2,5})/;
+        if (!regName.test(empName)) {
+            // alert("用户名格式错误");
+            show_validate_msg("#empName_add_input", "error", "用户名必须为2-5位中文，或6-16位英文");
             return false;
+        } else {
+            show_validate_msg("#empName_add_input", "success", "");
         }
-
+        // 校验用户邮箱
         var email = $("#email_add_input").val();
         var regEmail = /([a-z)-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
-        // 校验用户邮箱
-        if(!regEmail.test(email)){
-            alert("邮箱格式错误");
+        if (!regEmail.test(email)) {
+            // alert("邮箱格式错误");
+            show_validate_msg("#email_add_input", "error", "邮箱格式错误");
             return false;
+        } else {
+            show_validate_msg("#email_add_input", "success", "");
         }
-
+        // 校验成功，返回true
         return true;
     }
+
+    // 信息展示方法
+    function show_validate_msg(ele, status, msg) {
+        // 先清除原始状态
+        $(ele).parent().removeClass("has-success has-error");
+        $(ele).next("span").text("");
+        if ("success" == status) {
+            $(ele).parent().addClass("has-success");
+            $(ele).next("span").text(msg);
+        } else if ("error" == status) {
+            $(ele).parent().addClass("has-error");
+            $(ele).next("span").text(msg);
+        }
+    }
+
+    // 校验用户名是否可用
+    $("#empName_add_input").change(function () {
+        // 发送ajax请求校验用户名是否可用
+        var empName = this.value;
+        $.ajax({
+            url: "${APP_PATH}/checkuser",
+            data: "empName=" + empName,
+            type: "POST",
+            success: function (result) {
+                if (result.code == 100) {
+                    show_validate_msg("#empName_add_input", "success", "用户名可用");
+                    $("#emp_save_btn").attr("ajax-va", "success");
+                } else {
+                    show_validate_msg("#empName_add_input", "error", result.extendMap.va_msg);
+                    $("#emp_save_btn").attr("ajax-va", "error");
+                }
+            }
+        });
+    });
+
 </script>
 </body>
 </html>

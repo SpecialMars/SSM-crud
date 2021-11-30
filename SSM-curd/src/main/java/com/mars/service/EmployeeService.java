@@ -1,6 +1,7 @@
 package com.mars.service;
 
 import com.mars.bean.Employee;
+import com.mars.bean.EmployeeExample;
 import com.mars.dao.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,17 @@ public class EmployeeService {
      */
     public void saveEmp(Employee employee) {
         employeeMapper.insertSelective(employee);
+    }
+
+    /**
+     * 检验用户是否存在
+     * @param empName
+     */
+    public boolean checkUser(String empName) {
+        EmployeeExample example = new EmployeeExample();
+        EmployeeExample.Criteria criteria = example.createCriteria();
+        criteria.andEmpNameEqualTo(empName);
+        long l = employeeMapper.countByExample(example);
+        return l == 0;
     }
 }

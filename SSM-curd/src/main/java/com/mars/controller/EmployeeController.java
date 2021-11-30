@@ -9,12 +9,17 @@ import com.mars.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ClassName:EmployeeController
@@ -31,15 +36,52 @@ public class EmployeeController {
     EmployeeService employeeService;
 
     /**
+     * 检查用户名是否可用
+     *
+     * @param empName
+     * @return
+     */
+    @RequestMapping("/checkuser")
+    @ResponseBody
+    public Msg checkUser(@RequestParam(value = "empName") String empName) {
+        // 检验姓名是否符合要求
+        String regx = "(^[a-zA-Z0-9_-]{6,16}$)|(^[\\u2E80-\\u9FFF}]{2,5})";
+        if (!empName.matches(regx)) {
+            return Msg.fail().add("va_msg", "用户名必须为2-5位中文，或6-16位英文");
+        }
+
+        // 数据库同名信息校验
+        boolean b = employeeService.checkUser(empName);
+        if (b) {
+            return Msg.success();
+        } else {
+            return Msg.fail().add("va_msg", "用户名已被占用");
+        }
+    }
+
+    /**
      * 保存用户信息
+     * 1、支持JSR303校验
+     * 2、导入Hibernate-Validator
      *
      * @return
      */
-    @RequestMapping(value = "/emp",method = RequestMethod.POST)
+    @RequestMapping(value = "/emp", method = RequestMethod.POST)
     @ResponseBody
-    public Msg saveEmp(Employee employee){
-        employeeService.saveEmp(employee);
-        return Msg.success();
+    public Msg saveEmp(@Valid Employee employee, BindingResult result) {
+        if (result.hasErrors()) {
+            // 校验失败，应该返回失败，在模态框中显示校验失败的信息
+            Map<String,Object> map = new HashMap<>();
+            List<FieldError> errors = result.getFieldErrors();
+            for (FieldError error : errors) {
+                map.put(error.getField(),error.getDefaultMessage());
+            }
+            return Msg.fail().add("errorFields",map);
+        } else {
+            employeeService.saveEmp(employee);
+            return Msg.success();
+        }
+
     }
 
     /**
@@ -60,7 +102,7 @@ public class EmployeeController {
         // PageInfo中封装了详细的分页信息，包括查询出来的数据，传入连续显示的页数
         PageInfo page = new PageInfo(employeeList, 5);
 
-        return Msg.success().add("pageInfo",page);
+        return Msg.success().add("pageInfo", page);
     }
 
     /**

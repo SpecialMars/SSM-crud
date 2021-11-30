@@ -87,7 +87,7 @@
             <version>5.1.47</version>
         </dependency>
 
-        <!--（jstl、servlet-api、junit、JSON）-->
+        <!--（jstl、servlet-api、junit、JSON、jsp、JSR303）-->
         <dependency>
             <groupId>jstl</groupId>
             <artifactId>jstl</artifactId>
@@ -112,6 +112,19 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>2.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.4.1.Final</version>
         </dependency>
 
     </dependencies>
