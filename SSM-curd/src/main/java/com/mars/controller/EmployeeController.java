@@ -14,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,35 @@ public class EmployeeController {
 
     @Autowired
     EmployeeService employeeService;
+
+    /**
+     * 单个批量二合一
+     * 批量删除：1-2-3
+     * 单个删除：1
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/emp/{ids}",method = RequestMethod.DELETE)
+    @ResponseBody
+    public Msg deleteEmpById(@PathVariable("ids")String ids){
+        if(ids.contains("-")){
+            // 进行分割
+            String[] str_ids = ids.split("-");
+            List<Integer> idsList = new ArrayList<>();
+            for (String str_id : str_ids) {
+                Integer strId = Integer.parseInt(str_id);
+                idsList.add(strId);
+            }
+            employeeService.deleteBatch(idsList);
+        }else {
+            Integer id = Integer.parseInt(ids);
+            employeeService.deleteEmpById(id);
+        }
+
+
+        return Msg.success();
+    }
 
     /**
      * 更新用户信息

@@ -157,7 +157,7 @@
     <div class="row">
         <div class="col-md-4 col-md-offset-8">
             <button type="button" class="btn btn-success" id="emp_add_model_btn">添加</button>
-            <button type="button" class="btn btn-danger">删除</button>
+            <button type="button" class="btn btn-danger" id="emp_delete_all_btn">删除</button>
         </div>
     </div>
     <!--显示表格数据-->
@@ -166,6 +166,9 @@
             <table class="table table-hover" id="emps_table">
                 <thead>
                 <tr>
+                    <th>
+                        <input type="checkbox" id="check_all"/>
+                    </th>
                     <th>#</th>
                     <th>姓名</th>
                     <th>性别</th>
@@ -190,7 +193,7 @@
 <script type="text/javascript">
 
     // 定义全局变量，用来显示总记录数
-    var pageTotals,currrentPage;
+    var pageTotals, currrentPage;
     // 1、页面加载完成以后，直接去发送ajax请求，要到分页数据
     $(function () {
         // 去首页
@@ -220,6 +223,7 @@
         var emps = result.extendMap.pageInfo.list;
         // 遍历list,emps要遍历的元素，每次遍历的回调函数就是function(索引，当前对象)
         $.each(emps, function (index, item) {
+            var checkBoxTd = $("<td></td>").append($("<input type='checkbox' class='check_item'/>"));
             var empIdTd = $("<td></td>").append(item.empId);
             var empNameTd = $("<td></td>").append(item.empName);
             var genderTd = $("<td></td>").append(item.gender == "M" ? "男" : "女");
@@ -230,9 +234,10 @@
             editBtn.attr("edit-id", item.empId);
             var delBtn = $("<button></button>").addClass("btn btn-danger delete_btn")
                 .append($("<span><span>").addClass("glyphicon glyphicon-remove")).append("删除");
+            delBtn.attr("del-id", item.empId);
 
             // append方法完成后还会返回原来的元素
-            $("<tr></t>").append(empIdTd).append(empNameTd)
+            $("<tr></t>").append(checkBoxTd).append(empIdTd).append(empNameTd)
                 .append(genderTd).append(emailTd)
                 .append(deptNameTd).append(editBtn).append("&nbsp;")
                 .append(delBtn).appendTo("#emps_table tbody");
@@ -459,6 +464,7 @@
         });
     });
 
+
     // 不能用.click绑定因为.click绑定在js加载时绑定事件而编辑按钮是ajax请求带过来的
     // 给编辑按钮绑定事件
     $(document).on("click", ".edit_btn", function () {
@@ -474,6 +480,7 @@
         });
     });
 
+    // 获取员工信息
     function getEmp(id) {
         $.ajax({
             url: "${APP_PATH}/emp/" + id,
@@ -520,6 +527,64 @@
             }
         });
     });
+
+    // 单个删除绑定事件
+    $(document).on("click", ".delete_btn", function () {
+        // 弹出是否确认删除对话框
+        // 删除员工姓名
+        var del_empName = $(this).parent("tr").find("td:eq(2)").text();
+        if (confirm("确认删除【" + del_empName + "】的信息吗?")) {
+            // 确认则发送ajax请求删除数据
+            $.ajax({
+                url: "${APP_PATH}/emp/" + $(this).attr("del-id"),
+                type: "POST",
+                data: "_method=DELETE",
+                success: function (result) {
+                    to_page(currrentPage);
+                }
+            });
+        }
+    });
+
+    // 完成全选/全不选功能
+    $("#check_all").click(function () {
+        // attr获取自定义属性的值
+        // prop读取dom原生的值
+        $(".check_item").prop("checked", $(this).prop("checked"));
+    });
+    // 如果当前页面选择框全部选中则全选框也要选中
+    $(document).on("click", ".check_item", function () {
+        var flag = $(".check_item:checked").length == $(".check_item").length;
+        $("#check_all").prop("checked", flag);
+    });
+
+    // 给批量删除设定点击事件
+    $("#emp_delete_all_btn").click(function () {
+        // 获取要删除用户的姓名
+        var empNames = "";
+        var del_idstr = "";
+        $.each($(".check_item:checked"), function () {
+            empNames += $(this).parents("tr").find("td:eq(2)").text() + ", ";
+            // 组装员工id字符串
+            del_idstr += $(this).parents("tr").find("td:eq(1)").text() + "-"
+        });
+        // 去除末尾字符
+        empNames = empNames.substring(0, empNames.length - 2);
+        del_idstr = del_idstr.substring(0, del_idstr.length - 1);
+        if (confirm("您确定要删除【" + empNames + "】这些用户信息吗？")) {
+            ""
+            // 发送ajax请求删除用户信息
+            $.ajax({
+                url: "${APP_PATH}/emp/" + del_idstr,
+                type: "POST",
+                data: "_method=DELETE",
+                success: function (result) {
+                    to_page(currrentPage);
+                }
+            });
+        }
+    });
+
 </script>
 </body>
 </html>
