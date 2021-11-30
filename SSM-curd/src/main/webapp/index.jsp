@@ -20,6 +20,64 @@
     <script src="${APP_PATH}/static/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
 </head>
 <body>
+<!--添加用户的模态框-->
+<div class="modal fade" id="empAddModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="empName_add_input" class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="empName" class="form-control" id="empName_add_input"
+                                   placeholder="empName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_add_input" class="col-sm-2 control-label">邮箱</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="email" class="form-control" id="email_add_input"
+                                   placeholder="emial">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">性别</label>
+                        <div class="col-sm-10">
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender1_add_input" value="M" checked="checked"> 男
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender2_add_input" value="W"> 女
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">所在部门</label>
+                        <div class="col-sm-4">
+                            <!--提交部门id即可-->
+                            <select class="form-control" name="dId" id="dept_add_select">
+
+                            </select>
+                        </div>
+                    </div>
+
+
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!--搭建显示页面-->
 <div class="container">
     <!--标题-->
@@ -31,7 +89,7 @@
     <!--按钮-->
     <div class="row">
         <div class="col-md-4 col-md-offset-8">
-            <button type="button" class="btn btn-success">添加</button>
+            <button type="button" class="btn btn-success" id="emp_add_model_btn">添加</button>
             <button type="button" class="btn btn-danger">删除</button>
         </div>
     </div>
@@ -137,12 +195,12 @@
         if (result.extendMap.pageInfo.hasPreviousPage == false) {
             firstPageLi.addClass("disabled");
             prePageLi.addClass("disabled");
-        }else {
+        } else {
             // 绑定点击事件
-            prePageLi.click(function (){
-                to_page(result.extendMap.pageInfo.pageNum - 1) ;
+            prePageLi.click(function () {
+                to_page(result.extendMap.pageInfo.pageNum - 1);
             });
-            firstPageLi.click(function (){
+            firstPageLi.click(function () {
                 to_page(1);
             });
         }
@@ -153,13 +211,13 @@
         if (result.extendMap.pageInfo.hasNextPage == false) {
             lastPageLi.addClass("disabled");
             nextPageLi.addClass("disabled")
-        }else{
+        } else {
             // 绑定事件
-            nextPageLi.click(function (){
+            nextPageLi.click(function () {
                 to_page(result.extendMap.pageInfo.pageNum + 1);
 
             });
-            lastPageLi.click(function (){
+            lastPageLi.click(function () {
                 to_page(result.extendMap.pageInfo.pages);
             });
         }
@@ -168,13 +226,14 @@
         ul.append(firstPageLi).append(prePageLi);
 
         var pageNums = result.extendMap.pageInfo.navigatepageNums;
+        // item指当前页
         $.each(pageNums, function (index, item) {
             var pageLi = $("<li></li>").append($("<a></a>").append(item).attr("href", "#"));
             if (result.extendMap.pageInfo.pageNum == item) {
                 pageLi.addClass("active");
             }
             // 绑定点击事件
-            pageLi.click(function (){
+            pageLi.click(function () {
                 to_page(item);
             });
             ul.append(pageLi);
@@ -183,6 +242,33 @@
         ul.append(nextPageLi).append(lastPageLi);
         var navEle = $("<nav></nav>").append(ul);
         navEle.appendTo("#page_nav_area");
+    }
+
+    // 绑定用户添加的事件，点击新增按钮弹出模态框
+    $("#emp_add_model_btn").click(function () {
+        // 发送Ajax请求，查出部门信息，显示在下拉列表中
+        getDepts();
+        // 弹出模态框
+        $('#empAddModel').modal({
+            backdrop: "static"
+        });
+    });
+
+    // 查出所有部门信息，并显示在下拉列表中
+    function getDepts() {
+        $.ajax({
+            url: "${APP_PATH}/depts",
+            type: "GET",
+            success:function (result){
+                // {"code":100,"msg":"处理成功！","extendMap":{"depts":[{"deptId":1,"deptName":"财务部"},{"deptId":2,"deptName":"开发部"}]}}
+                $.each(result.extendMap.depts,function(){
+                    // console.log(result);
+                    // this也可以代表当前对象
+                    var optionEle = $("<option></option>").append(this.deptName).attr("value",this.deptId);
+                    optionEle.appendTo("#dept_add_select");
+                });
+            }
+        });
     }
 
 </script>
