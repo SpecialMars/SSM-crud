@@ -230,7 +230,6 @@
             });
         }
 
-
         ul.append(firstPageLi).append(prePageLi);
 
         var pageNums = result.extendMap.pageInfo.navigatepageNums;
@@ -279,8 +278,12 @@
         });
     }
 
-    // 为添加绑定点击事件
+    // 为添加绑定点击事件，保存员工信息
     $("#emp_save_btn").click(function () {
+        // 先对要提交给服务器的数据进行校验
+        if(!validate_add_form()){
+            return false;
+        }
         // 模态框中填写表单数据提交给服务器进行保存
         // 发送ajax请求保存员工
         // 使用序列化
@@ -299,6 +302,28 @@
         });
     });
 
+    // 定义校验表单数据方法
+    function validate_add_form() {
+        // 1、拿到要校验的数据，使用正则表达式
+        var empName = $("#empName_add_input").val();
+        var regName = /(^[a-zA-Z0-9_-]{6,16}$)|(^{\u2E80-\u9FFF}{2,5})/;
+
+        // 校验用户姓名
+        if(!regName.test(empName)){
+            alert("用户名格式错误");
+            return false;
+        }
+
+        var email = $("#email_add_input").val();
+        var regEmail = /([a-z)-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        // 校验用户邮箱
+        if(!regEmail.test(email)){
+            alert("邮箱格式错误");
+            return false;
+        }
+
+        return true;
+    }
 </script>
 </body>
 </html>
