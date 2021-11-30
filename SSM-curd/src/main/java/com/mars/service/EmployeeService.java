@@ -22,11 +22,20 @@ public class EmployeeService {
     EmployeeMapper employeeMapper;
 
     /**
-     * 查询所有员工
+     * 查询所有用户
      * @return
      */
     public List<Employee> getAll() {
 
         return employeeMapper.selectByExampleWithDept(null);
+    }
+
+    /**
+     * 保存员工方法
+     *
+     * @param employee
+     */
+    public void saveEmp(Employee employee) {
+        employeeMapper.insertSelective(employee);
     }
 }

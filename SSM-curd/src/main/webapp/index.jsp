@@ -20,6 +20,7 @@
     <script src="${APP_PATH}/static/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
 </head>
 <body>
+
 <!--添加用户的模态框-->
 <div class="modal fade" id="empAddModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -39,6 +40,7 @@
                                    placeholder="empName">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="email_add_input" class="col-sm-2 control-label">邮箱</label>
                         <div class="col-sm-10">
@@ -46,6 +48,7 @@
                                    placeholder="emial">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label class="col-sm-2 control-label">性别</label>
                         <div class="col-sm-10">
@@ -57,6 +60,7 @@
                             </label>
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label class="col-sm-2 control-label">所在部门</label>
                         <div class="col-sm-4">
@@ -66,15 +70,15 @@
                             </select>
                         </div>
                     </div>
-
-
                 </form>
 
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">添加</button>
+                <button type="button" class="btn btn-primary" id="emp_save_btn">添加</button>
             </div>
+
         </div>
     </div>
 </div>
@@ -121,6 +125,9 @@
 </div>
 
 <script type="text/javascript">
+
+    // 定义全局变量，用来显示总记录数
+    var pageTotals;
     // 1、页面加载完成以后，直接去发送ajax请求，要到分页数据
     $(function () {
         // 去首页
@@ -174,7 +181,8 @@
         $("#page_info_area").empty();
         $("#page_info_area").append("当前第" + result.extendMap.pageInfo.pageNum + "页 共"
             + result.extendMap.pageInfo.pages + "页 共"
-            + result.extendMap.pageInfo.total + "条记录")
+            + result.extendMap.pageInfo.total + "条记录");
+        pageTotals = result.extendMap.pageInfo.total;
     }
 
     // 构建分页条
@@ -259,17 +267,37 @@
         $.ajax({
             url: "${APP_PATH}/depts",
             type: "GET",
-            success:function (result){
+            success: function (result) {
                 // {"code":100,"msg":"处理成功！","extendMap":{"depts":[{"deptId":1,"deptName":"财务部"},{"deptId":2,"deptName":"开发部"}]}}
-                $.each(result.extendMap.depts,function(){
+                $.each(result.extendMap.depts, function () {
                     // console.log(result);
                     // this也可以代表当前对象
-                    var optionEle = $("<option></option>").append(this.deptName).attr("value",this.deptId);
+                    var optionEle = $("<option></option>").append(this.deptName).attr("value", this.deptId);
                     optionEle.appendTo("#dept_add_select");
                 });
             }
         });
     }
+
+    // 为添加绑定点击事件
+    $("#emp_save_btn").click(function () {
+        // 模态框中填写表单数据提交给服务器进行保存
+        // 发送ajax请求保存员工
+        // 使用序列化
+        $.ajax({
+            url: "${APP_PATH}/emp",
+            type: "POST",
+            // 发送的数据就是表格序列化后的数据
+            data: $("#empAddModel form").serialize(),
+            success: function (result) {
+                // 完成请求后需要将模态框关闭，并到末页
+                $("#empAddModel").modal("hide");
+                // 到最后一页
+                // 发送ajax请求显示最后一页数据
+                to_page(pageTotals);
+            }
+        });
+    });
 
 </script>
 </body>
