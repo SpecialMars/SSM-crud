@@ -150,7 +150,7 @@
     <!--标题-->
     <div class="row">
         <div class="col-md-12">
-            <h1>SSM-CRUD</h1>
+            <h1>SSM-CRUD BY Mars</h1>
         </div>
     </div>
     <!--按钮-->
