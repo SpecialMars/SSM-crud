@@ -192,7 +192,7 @@
 
 <script type="text/javascript">
 
-    // 定义全局变量，用来显示总记录数
+    // 定义全局变量，用来显示总记录数，和当前页
     var pageTotals, currrentPage;
     // 1、页面加载完成以后，直接去发送ajax请求，要到分页数据
     $(function () {
@@ -495,7 +495,7 @@
         });
     }
 
-    // 点击更新，更新员工数据
+    // 点击更新按钮，更新员工数据
     $("#emp_update_btn").click(function () {
         // 校验邮箱信息
         var email = $("#email_update_input").val();
@@ -584,7 +584,6 @@
             });
         }
     });
-
 </script>
 </body>
 </html>
